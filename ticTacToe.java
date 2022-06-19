@@ -5,7 +5,6 @@ import java.awt.event.*;
 import java.util.ArrayList;
 
 public class ticTacToe{
-
     JFrame MainWindow;
     JPanel GridContainer;
 
@@ -40,6 +39,24 @@ public class ticTacToe{
 
         JButton ClearButton = new JButton("Restart");
         OptionButtons.add(ClearButton);
+
+		ClearButton.addActionListener( new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+                for(int i=0; i<CellHolder.length; i++){
+                    TicTacToeCell[] column = CellHolder[i];
+
+                    for(int j=0; j<column.length; j++){
+                        TicTacToeCell c = CellHolder[i][j];
+                        c.valueOf = 0;
+                    }
+
+                }
+
+                System.out.println("Restarting game");
+                MainWindow.repaint();
+
+			}// end ActionEvent
+        });
 
         OptionsPane.setBorder( BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
@@ -83,42 +100,37 @@ public class ticTacToe{
     public void setFormView(){
         JLabel formViewText = new JLabel("Next:");
         formViewText.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
-        // System.out.println("86. OptionsPane.getWidth = " + OptionsPane.getWidth());
-        // formView = new FormVisualizer(OptionsPane.getWidth());
+
         formView = new FormVisualizer(50);
         OptionsPane.add(formViewText);
         OptionsPane.add(formView);
     }
 
     public void updateForm(){
-        System.out.println("Updating form");
         if(CurrentForm == ticTacToe.X_FORM){
             System.out.println("Setting CurrentForm from X to O");
             CurrentForm = ticTacToe.O_FORM;
-            // formView.paintO();
 	}
 
         else if(CurrentForm == ticTacToe.O_FORM){
             System.out.println("Setting CurrentForm from O to X");
             CurrentForm = ticTacToe.X_FORM;
-            // formView.paintX();
         }
     }
 
 
     public void run(){
         setBaseGUI();
-        MainWindow.setVisible(true); 
-
         setCells();
+
         setOptionPane();
+        MainWindow.setVisible(true); 
 
         setFormView(); // this necessarily has to come after 
 
 
         CurrentForm = ticTacToe.X_FORM;
         updateForm();
-        MainWindow.repaint();
     }
 
     public static void main(String[] args){
@@ -146,22 +158,11 @@ public class ticTacToe{
 
             if(valueOf == ticTacToe.X_FORM){
                 //Draws X
-                gg.setColor(Color.BLUE);
-                gg.setStroke(new BasicStroke(10.0f));
-
-
-                int marginX = (int) (this.getWidth() * 0.165);
-                int marginY = (int) (this.getHeight() * 0.165);
-
-                gg.drawLine(0 + marginX, 0 + marginX, this.getWidth() - marginX, this.getHeight() - marginX);
-                gg.drawLine(0 + marginX, this.getHeight() - marginY, this.getWidth() - marginX, 0 + marginY );
+                Graphics2DFormPainter.drawX(gg, this.getWidth(), this.getHeight());
 
             }else if(valueOf == ticTacToe.O_FORM){
                 //Draws O
-                int s = (int) (this.getHeight() * 0.66);
-                gg.setColor(Color.PINK);
-                gg.setStroke(new BasicStroke(10.0f));
-                gg.drawOval(this.getWidth()/2 - s/2, this.getHeight()/2 - s/2, s, s);
+                Graphics2DFormPainter.drawCircle(gg, this.getWidth(), this.getHeight());
             }
 
 
@@ -178,49 +179,40 @@ public class ticTacToe{
         }
 
         public void paintComponent(Graphics g){
-            Graphics2D gg = this.getGraphics2D();;
-
-	    gg.setColor(Color.red);
-	    gg.fillRect(0, 0, 20, 20);
-
+            System.out.println("PaintComponent Called in FormVisualizer"); 
+            g.setColor(Color.black);
+            g.drawRect(0, 0, 20, 20);
+		super.paintComponent(g);
 
         }
 
-        private Graphics2D getGraphics2D(){
-            Graphics2D g2D = (Graphics2D) this.getGraphics();
-            g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); 
-            g2D.clearRect(0, 0, this.getWidth(), this.getHeight());
+    }// end class
 
-            // System.out.println(this.getWidth());
-            // System.out.println(this.getHeight());
-            return g2D;
-        }
 
-        public void paintX(){
-            Graphics2D gg = this.getGraphics2D();;
-
-            gg.setColor(Color.BLACK);
+    class Graphics2DFormPainter{
+        public static Graphics2D drawX(Graphics2D gg, int width, int height){
+            gg.setColor(Color.BLUE);
             gg.setStroke(new BasicStroke(10.0f));
 
-            int marginX = (int) (this.getWidth() * 0.165);
-            int marginY = (int) (this.getHeight() * 0.165);
+            int marginX = (int) (width * 0.165);
+            int marginY = (int) (height * 0.165);
 
-            gg.drawLine(0 + marginX, 0 + marginX, this.getWidth() - marginX, this.getHeight() - marginX);
-            gg.drawLine(0 + marginX, this.getHeight() - marginY, this.getWidth() - marginX, 0 + marginY );
+            //Desenha duas linhas
+            gg.drawLine(0 + marginX, 0 + marginY, width - marginX, height - marginY);
+            gg.drawLine(0 + marginX, height - marginY, width - marginX, 0 + marginY );
+
+            return gg;
         }
 
-        public void paintO(){
-            Graphics2D gg = this.getGraphics2D();;
-
-            int s = (int) (this.getHeight() * 0.66);
-            gg.setColor(Color.BLACK);
+        public static Graphics2D drawCircle(Graphics2D gg, int width, int height){
+            int s = (int) (height * 0.66);
+            gg.setColor(Color.PINK);
             gg.setStroke(new BasicStroke(10.0f));
-            gg.drawOval(this.getWidth()/2 - s/2, this.getHeight()/2 - s/2, s, s);
+            gg.drawOval(width/2 - s/2, height/2 - s/2, s, s);
+
+            return gg;
         }
 
-    }
+    }// end class
+
 }
-
-
-
-
