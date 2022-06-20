@@ -13,6 +13,7 @@ public class ticTacToe{
 
     JPanel OptionsPane;
     FormVisualizer formView;
+    PrettyJLabel formViewLabel;
 
     int CurrentForm;
     int PlayedTimes;
@@ -64,14 +65,16 @@ public class ticTacToe{
 
                 CurrentForm = ticTacToe.X_FORM;
                 PlayedTimes = 0;
-                MainWindow.repaint();
-                
+                formViewLabel.setText("Next:");
+
                 //enables back clicks in game grid
                 Component[] grid_components = GameGrid.getComponents();
                 for(int c = 0; c < grid_components.length; c++){
                     Component comp = grid_components[c];
                     comp.setEnabled(true);
                 }
+
+                MainWindow.repaint();
 
 			}// end ActionEvent
         });
@@ -118,10 +121,18 @@ public class ticTacToe{
                                     comp.setEnabled(false);
                                 }
 
+                                if(gr.WinnerForm == ticTacToe.X_FORM){
+                                    formViewLabel.setText("X wins");
+                                }else if(gr.WinnerForm == ticTacToe.O_FORM){
+                                    formViewLabel.setText("O wins");
+                                }
+
+                                CurrentForm = ticTacToe.NULL_FORM;
+                                MainWindow.repaint();
+
                                 // System.out.println(Arrays.toString(gr.winningPositionStart));
                                 // System.out.println(Arrays.toString(gr.winningPositionEnd));
                             }
-
 
                             PlayedTimes += 1;
                         }
@@ -142,12 +153,12 @@ public class ticTacToe{
     }
 
     public void setFormView(){
-        PrettyJLabel formViewText = new PrettyJLabel("Next:");
-        formViewText.setFont( new Font(Font.DIALOG, Font.PLAIN, 20));
-        formViewText.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
+        formViewLabel = new PrettyJLabel("Next:");
+        formViewLabel.setFont( new Font(Font.DIALOG, Font.PLAIN, 20));
+        formViewLabel.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
 
         formView = new FormVisualizer(50);
-        OptionsPane.add(formViewText);
+        OptionsPane.add(formViewLabel);
         OptionsPane.add(Box.createVerticalStrut(5));
         OptionsPane.add(formView);
     }
