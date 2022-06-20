@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 import java.util.ArrayList;
+import java.util.Map;
+
 
 public class ticTacToe{
     JFrame MainWindow;
@@ -14,9 +16,9 @@ public class ticTacToe{
     int CurrentForm;
     int PlayedTimes;
 
-    static final int NULL_FORM = 0;
+    static final int NULL_FORM = -1;
     static final int X_FORM = 1;
-    static final int O_FORM = 2;
+    static final int O_FORM = 0;
 
     TicTacToeCell[][] CellHolder = new TicTacToeCell[3][3];
 
@@ -26,7 +28,7 @@ public class ticTacToe{
         MainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         MainWindow.setSize( new Dimension(500, 500));
         MainWindow.setLocationRelativeTo(null);
-        // MainWindow.setResizable(false);
+        MainWindow.setResizable(false);
 
         GridContainer = new JPanel( new GridLayout(3, 3));
     }
@@ -38,7 +40,10 @@ public class ticTacToe{
 
         ArrayList<JButton> OptionButtons = new ArrayList<>();
 
-        JButton ClearButton = new JButton("Restart");
+        PrettyJButton ClearButton = new PrettyJButton("Restart");
+        //System.out.println(ClearButton.getFont());
+        ClearButton.setFont(new Font("SansSerif", Font.PLAIN, 20));
+
         OptionButtons.add(ClearButton);
 
 		ClearButton.addActionListener( new ActionListener(){
@@ -48,11 +53,12 @@ public class ticTacToe{
 
                     for(int j=0; j<column.length; j++){
                         TicTacToeCell c = CellHolder[i][j];
-                        c.valueOf = 0;
+                        c.valueOf = ticTacToe.NULL_FORM;
                     }
                 }
 
-                System.out.println("Restarting game");
+                System.out.println("\nRestarting game\n");
+                
                 CurrentForm = ticTacToe.X_FORM;
                 PlayedTimes = 0;
                 MainWindow.repaint();
@@ -78,6 +84,7 @@ public class ticTacToe{
         for(int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
                 TicTacToeCell cell = new TicTacToeCell();
+                cell.valueOf = ticTacToe.NULL_FORM;
 
                 CellHolder[i][j] = cell;
                 GridContainer.add(cell);
@@ -87,8 +94,9 @@ public class ticTacToe{
 
                         if(cell.valueOf == ticTacToe.NULL_FORM){
                             cell.valueOf = CurrentForm;
-                            updateForm();
 
+                            updateForm();
+                            checkIfWin();
                             PlayedTimes += 1;
                         }
 
@@ -108,7 +116,8 @@ public class ticTacToe{
     }
 
     public void setFormView(){
-        JLabel formViewText = new JLabel("Next:");
+        PrettyJLabel formViewText = new PrettyJLabel("Next:");
+        formViewText.setFont( new Font(Font.DIALOG, Font.PLAIN, 20));
         formViewText.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
 
         formView = new FormVisualizer(50);
@@ -117,14 +126,108 @@ public class ticTacToe{
         OptionsPane.add(formView);
     }
 
+    public void checkIfWin(){
+        String X_WIN = "111";
+        String O_WIN = "000";
+
+        for(int x=0; x < CellHolder.length; x++){
+            for(int y =0; y < CellHolder.length; y++){
+                StringBuilder cellstream = new StringBuilder();
+                TicTacToeCell currentcell;
+                int lx; int ly;
+
+                //diagonal from TOP LEFT to BOTTOM RIGHT
+                for(int n = 0; n < 3; n++){
+                    lx = x + n;
+                    ly = y + n;
+
+                    try{
+                        currentcell = CellHolder[ly][lx];
+                        cellstream.append(currentcell.valueOf);
+                    }catch(ArrayIndexOutOfBoundsException e){
+                        break;
+                    }
+                }
+                if(cellstream.toString().equals(X_WIN)){
+                    System.out.println("X_WIN FROM TOP LEFT TO BOTTOM RIGHT");
+                }else if(cellstream.toString().equals(O_WIN)){
+                    System.out.println("O_WIN FROM TOP LEFT TO BOTTOM RIGHT");
+                }
+                cellstream.setLength(0); //reset
+
+                //diagonal from TOP RIGHT to BOTTOM LEFT
+                for(int n = 0; n < 3; n++){
+                    lx = x - n;
+                    ly = y + n;
+
+                    try{
+                        currentcell = CellHolder[ly][lx];
+                        cellstream.append(currentcell.valueOf);
+                    }catch(ArrayIndexOutOfBoundsException e){
+                        break;
+                    }
+                }
+                if(cellstream.toString().equals(X_WIN)){
+                    System.out.println("X_WIN FROM TOP RIGHT TO BOTTOM LEFT");
+                }else if(cellstream.toString().equals(O_WIN)){
+                    System.out.println("O_WIN FROM TOP RIGHT TO BOTTOM LEFT");
+                }
+                cellstream.setLength(0); //reset
+                                         
+                //diagonal from TOP to BOTTOM // Fix this shit nigga  
+                for(int n = 0; n < 3; n++){
+                    lx = x;
+                    ly = y + n;
+
+                    try{
+                        currentcell = CellHolder[ly][lx];
+                        cellstream.append(currentcell.valueOf);
+                    }catch(ArrayIndexOutOfBoundsException e){
+                        break;
+                    }
+                }
+                if(cellstream.toString().equals(X_WIN)){
+                    System.out.println("X_WIN FROM VERTICAL POSITION");
+                }else if(cellstream.toString().equals(O_WIN)){
+                    System.out.println("O_WIN FROM VERTICAL POSITION");
+                }
+                cellstream.setLength(0); //reset
+
+
+                //diagonal from TOP to BOTTOM // Fix this shit nigga  
+                for(int n = 0; n < 3; n++){
+                    lx = x + n;
+                    ly = y;
+
+                    try{
+                        currentcell = CellHolder[ly][lx];
+                        cellstream.append(currentcell.valueOf);
+                    }catch(ArrayIndexOutOfBoundsException e){
+                        break;
+                    }
+                }
+                if(cellstream.toString().equals(X_WIN)){
+                    System.out.println("X_WIN FROM HORIZONTAL POSITIOn");
+                }else if(cellstream.toString().equals(O_WIN)){
+                    System.out.println("O_WIN FROM HORIZONTAL POSITIOn");
+                }
+                cellstream.setLength(0); //reset
+
+
+
+            }//inner
+        }// outter
+
+    }
+
     public void updateForm(){
         if(CurrentForm == ticTacToe.X_FORM){
-            System.out.println("Setting CurrentForm from X to O");
+            //System.out.println("Setting CurrentForm from X to O");
             CurrentForm = ticTacToe.O_FORM;
 	}
 
         else if(CurrentForm == ticTacToe.O_FORM){
-            System.out.println("Setting CurrentForm from O to X");
+            //System.out.println("Setting CurrentForm from O to X");
             CurrentForm = ticTacToe.X_FORM;
         }
     }
@@ -149,7 +252,7 @@ public class ticTacToe{
     }
 
     class TicTacToeCell extends JButton{
-        //0 = null; 1 = X; 2 = O;
+        //100 = null; 1 = X; 2 = O;
         int valueOf;
 
         TicTacToeCell(){
@@ -160,7 +263,7 @@ public class ticTacToe{
         }
 
         public void paintComponent(Graphics g){
-            super.paintComponent( g);
+            super.paintComponent(g);
 
             Graphics2D gg = (Graphics2D) g;
 
@@ -190,18 +293,18 @@ public class ticTacToe{
         }
 
         public void paintComponent(Graphics g){
-            System.out.println("PaintComponent Called in FormVisualizer"); 
+            //System.out.println("PaintComponent Called in FormVisualizer"); 
             super.paintComponent(g);
 
             Graphics2D gg = (Graphics2D) g;
             if(CurrentForm == ticTacToe.NULL_FORM){
-                System.out.println("Drawing NULL in view"); 
+                //System.out.println("Drawing NULL in view"); 
             }
             else if(CurrentForm == ticTacToe.X_FORM){
-                System.out.println("Drawing X in view"); 
+                //System.out.println("Drawing X in view"); 
                 Graphics2DFormPainter.drawX(gg, this.getWidth(), this.getWidth());
             }else if(CurrentForm == ticTacToe.O_FORM){
-                System.out.println("Drawing O in view"); 
+                //System.out.println("Drawing O in view"); 
                 Graphics2DFormPainter.drawCircle(gg, this.getWidth(), this.getWidth());
             }
 
@@ -238,5 +341,40 @@ public class ticTacToe{
         }
 
     }// end class
+
+}
+
+
+class PrettyJLabel extends JLabel{
+    PrettyJLabel(){
+        super();
+    }
+
+    PrettyJLabel(String str_arg){
+        super(str_arg);
+    }
+    public void paintComponent(Graphics g){
+        super.paintComponent(g);
+        Graphics2D gg = (Graphics2D) g;
+        gg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        gg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
+    }
+}
+
+class PrettyJButton extends JButton{
+    PrettyJButton(){
+        super();
+    }
+
+    PrettyJButton(String str_arg){
+        super(str_arg);
+    }
+
+    public void paintComponent(Graphics g){
+        super.paintComponent(g);
+        Graphics2D gg = (Graphics2D) g;
+        gg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        gg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
+    }
 
 }
