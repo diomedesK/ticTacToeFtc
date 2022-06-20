@@ -4,17 +4,20 @@ import java.awt.event.*;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Arrays;
 
 
 public class ticTacToe{
     JFrame MainWindow;
-    JPanel GridContainer;
+    JPanel GameGrid;
 
     JPanel OptionsPane;
     FormVisualizer formView;
 
     int CurrentForm;
     int PlayedTimes;
+
+    GameStatusWatcher gsw = new GameStatusWatcher();
 
     static final int NULL_FORM = -1;
     static final int X_FORM = 1;
@@ -30,7 +33,7 @@ public class ticTacToe{
         MainWindow.setLocationRelativeTo(null);
         MainWindow.setResizable(false);
 
-        GridContainer = new JPanel( new GridLayout(3, 3));
+        GameGrid = new JPanel( new GridLayout(3, 3));
     }
 
     public void setOptionPane(){
@@ -57,11 +60,18 @@ public class ticTacToe{
                     }
                 }
 
-                System.out.println("\nRestarting game\n");
-                
+                System.out.println("Restarting game");
+
                 CurrentForm = ticTacToe.X_FORM;
                 PlayedTimes = 0;
                 MainWindow.repaint();
+                
+                //enables back clicks in game grid
+                Component[] grid_components = GameGrid.getComponents();
+                for(int c = 0; c < grid_components.length; c++){
+                    Component comp = grid_components[c];
+                    comp.setEnabled(true);
+                }
 
 			}// end ActionEvent
         });
@@ -87,7 +97,7 @@ public class ticTacToe{
                 cell.valueOf = ticTacToe.NULL_FORM;
 
                 CellHolder[i][j] = cell;
-                GridContainer.add(cell);
+                GameGrid.add(cell);
 
                 cell.addActionListener( new ActionListener(){
                     public void actionPerformed(ActionEvent e){
@@ -96,7 +106,23 @@ public class ticTacToe{
                             cell.valueOf = CurrentForm;
 
                             updateForm();
-                            checkIfWin();
+                            GameStatusResponse gr = gsw.checkForWinner(CellHolder);
+
+                            if(gr.hasWinner){
+                                System.out.println(gr.message);
+                                
+                                //disables clicks in game grid
+                                Component[] grid_components = GameGrid.getComponents();
+                                for(int c = 0; c < grid_components.length; c++){
+                                    Component comp = grid_components[c];
+                                    comp.setEnabled(false);
+                                }
+
+                                // System.out.println(Arrays.toString(gr.winningPositionStart));
+                                // System.out.println(Arrays.toString(gr.winningPositionEnd));
+                            }
+
+
                             PlayedTimes += 1;
                         }
 
@@ -112,7 +138,7 @@ public class ticTacToe{
             }
         };
 
-        MainWindow.add(GridContainer, BorderLayout.CENTER );
+        MainWindow.add(GameGrid, BorderLayout.CENTER );
     }
 
     public void setFormView(){
@@ -126,100 +152,7 @@ public class ticTacToe{
         OptionsPane.add(formView);
     }
 
-    public void checkIfWin(){
-        String X_WIN = "111";
-        String O_WIN = "000";
-
-        for(int x=0; x < CellHolder.length; x++){
-            for(int y =0; y < CellHolder.length; y++){
-                StringBuilder cellstream = new StringBuilder();
-                TicTacToeCell currentcell;
-                int lx; int ly;
-
-                //diagonal from TOP LEFT to BOTTOM RIGHT
-                for(int n = 0; n < 3; n++){
-                    lx = x + n;
-                    ly = y + n;
-
-                    try{
-                        currentcell = CellHolder[ly][lx];
-                        cellstream.append(currentcell.valueOf);
-                    }catch(ArrayIndexOutOfBoundsException e){
-                        break;
-                    }
-                }
-                if(cellstream.toString().equals(X_WIN)){
-                    System.out.println("X_WIN FROM TOP LEFT TO BOTTOM RIGHT");
-                }else if(cellstream.toString().equals(O_WIN)){
-                    System.out.println("O_WIN FROM TOP LEFT TO BOTTOM RIGHT");
-                }
-                cellstream.setLength(0); //reset
-
-                //diagonal from TOP RIGHT to BOTTOM LEFT
-                for(int n = 0; n < 3; n++){
-                    lx = x - n;
-                    ly = y + n;
-
-                    try{
-                        currentcell = CellHolder[ly][lx];
-                        cellstream.append(currentcell.valueOf);
-                    }catch(ArrayIndexOutOfBoundsException e){
-                        break;
-                    }
-                }
-                if(cellstream.toString().equals(X_WIN)){
-                    System.out.println("X_WIN FROM TOP RIGHT TO BOTTOM LEFT");
-                }else if(cellstream.toString().equals(O_WIN)){
-                    System.out.println("O_WIN FROM TOP RIGHT TO BOTTOM LEFT");
-                }
-                cellstream.setLength(0); //reset
-                                         
-                //diagonal from TOP to BOTTOM // Fix this shit nigga  
-                for(int n = 0; n < 3; n++){
-                    lx = x;
-                    ly = y + n;
-
-                    try{
-                        currentcell = CellHolder[ly][lx];
-                        cellstream.append(currentcell.valueOf);
-                    }catch(ArrayIndexOutOfBoundsException e){
-                        break;
-                    }
-                }
-                if(cellstream.toString().equals(X_WIN)){
-                    System.out.println("X_WIN FROM VERTICAL POSITION");
-                }else if(cellstream.toString().equals(O_WIN)){
-                    System.out.println("O_WIN FROM VERTICAL POSITION");
-                }
-                cellstream.setLength(0); //reset
-
-
-                //diagonal from TOP to BOTTOM // Fix this shit nigga  
-                for(int n = 0; n < 3; n++){
-                    lx = x + n;
-                    ly = y;
-
-                    try{
-                        currentcell = CellHolder[ly][lx];
-                        cellstream.append(currentcell.valueOf);
-                    }catch(ArrayIndexOutOfBoundsException e){
-                        break;
-                    }
-                }
-                if(cellstream.toString().equals(X_WIN)){
-                    System.out.println("X_WIN FROM HORIZONTAL POSITIOn");
-                }else if(cellstream.toString().equals(O_WIN)){
-                    System.out.println("O_WIN FROM HORIZONTAL POSITIOn");
-                }
-                cellstream.setLength(0); //reset
-
-
-
-            }//inner
-        }// outter
-
-    }
-
+  
     public void updateForm(){
         if(CurrentForm == ticTacToe.X_FORM){
             //System.out.println("Setting CurrentForm from X to O");
@@ -342,6 +275,214 @@ public class ticTacToe{
 
     }// end class
 
+    class GameStatusResponse{
+        public boolean hasWinner;
+        public int WinnerForm;
+        public int[] winningPositionStart = new int[2];
+        public int[] winningPositionEnd = new int[2];
+        public String message;
+
+    }
+
+    class GameStatusWatcher{
+        //flags 
+        private final int TL_DIAGONAL   = 1;
+        private final int TR_DIAGONAL   = 2;
+        private final int HORIZONTAL    = 3;
+        private final int VERTICAL      = 4;
+
+        private final String X_WIN = "111";
+        private final String O_WIN = "000";
+
+        private Map<Integer, String> MethodMessages = Map.of
+            (
+             TL_DIAGONAL    , "FROM TOP LEFT TO BOTTOM RIGHT",
+             TR_DIAGONAL    , "FROM TOP RIGHT TO BOTTOM LEFT",
+             HORIZONTAL     , "FROM HORIZONTAL POSITION",
+             VERTICAL       , "FROM VERTICAL POSITION"
+            );
+
+      
+
+        public GameStatusResponse checkForWinner(TicTacToeCell[][] gameState){
+            GameStatusResponse status = new GameStatusResponse(); 
+            status.hasWinner = false;
+
+            for(int x=0; x < gameState.length; x++){
+                for(int y =0; y < gameState.length; y++){
+
+                    ArrayList<GameStatusResponse> analyzes = new ArrayList<>();
+
+                    analyzes.add(analyzePosition(gameState, TL_DIAGONAL, x, y));
+                    analyzes.add(analyzePosition(gameState, TR_DIAGONAL, x, y));
+                    analyzes.add(analyzePosition(gameState, HORIZONTAL, x, y));
+                    analyzes.add(analyzePosition(gameState, VERTICAL, x, y));
+
+                    for(int a = 0; a < analyzes.size(); a++){
+                        GameStatusResponse analyze = analyzes.get(a);
+                        if(analyze.hasWinner){
+                            return analyze;
+                        }
+                    }
+
+                }//inner
+            }// outter
+            
+            return status;
+        }
+
+        public GameStatusResponse analyzePosition(TicTacToeCell[][] gameState, int method, int x, int y){
+            GameStatusResponse status = new GameStatusResponse();
+            status.hasWinner = false;
+
+            StringBuilder cellstream = new StringBuilder();
+            TicTacToeCell currentcell;
+
+            int lx = 0;
+            int ly = 0;
+
+            for(int n = 0; n < 3; n++){
+
+                if(method == TL_DIAGONAL){
+                    lx = x + n;
+                    ly = y + n;
+                } else if(method == TR_DIAGONAL){
+                    lx = x - n;
+                    ly = y + n;
+                } else if(method == HORIZONTAL){
+                    lx = x + n;
+                    ly = y + 0;
+                } else if(method == VERTICAL){
+                    lx = x + 0;
+                    ly = y + n;
+                }
+
+                try{
+                    currentcell = CellHolder[ly][lx];
+                    cellstream.append(currentcell.valueOf);
+                }catch(ArrayIndexOutOfBoundsException e){
+                    break;
+                }
+            }
+
+            if(cellstream.toString().equals(X_WIN)){
+                status.hasWinner = true;
+                status.WinnerForm = ticTacToe.X_FORM;
+                status.message = "X FORM WINS " + MethodMessages.get(method);
+
+            }else if(cellstream.toString().equals(O_WIN)){
+                status.hasWinner = true;
+                status.WinnerForm = ticTacToe.O_FORM;
+                status.message = "O FORM WINS " + MethodMessages.get(method);
+            }
+
+            if(status.hasWinner){
+                status.winningPositionStart[0] = x;
+                status.winningPositionStart[1] = y;
+                status.winningPositionEnd[0] = lx;
+                status.winningPositionEnd[1] = ly;
+            }
+                                     
+            return status;
+        }
+
+        //public void checkIfWin(){
+        //    String X_WIN = "111";
+        //    String O_WIN = "000";
+
+        //    for(int x=0; x < CellHolder.length; x++){
+        //        for(int y =0; y < CellHolder.length; y++){
+        //            StringBuilder cellstream = new StringBuilder();
+        //            TicTacToeCell currentcell;
+        //            int lx; int ly;
+
+        //            //diagonal from TOP LEFT to BOTTOM RIGHT
+        //            for(int n = 0; n < 3; n++){
+        //                lx = x + n;
+        //                ly = y + n;
+
+        //                try{
+        //                    currentcell = CellHolder[ly][lx];
+        //                    cellstream.append(currentcell.valueOf);
+        //                }catch(ArrayIndexOutOfBoundsException e){
+        //                    break;
+        //                }
+        //            }
+        //            if(cellstream.toString().equals(X_WIN)){
+        //                System.out.println("X_WIN FROM TOP LEFT TO BOTTOM RIGHT");
+        //            }else if(cellstream.toString().equals(O_WIN)){
+        //                System.out.println("O_WIN FROM TOP LEFT TO BOTTOM RIGHT");
+        //            }
+        //            cellstream.setLength(0); //reset
+
+        //            //diagonal from TOP RIGHT to BOTTOM LEFT
+        //            for(int n = 0; n < 3; n++){
+        //                lx = x - n;
+        //                ly = y + n;
+
+        //                try{
+        //                    currentcell = CellHolder[ly][lx];
+        //                    cellstream.append(currentcell.valueOf);
+        //                }catch(ArrayIndexOutOfBoundsException e){
+        //                    break;
+        //                }
+        //            }
+        //            if(cellstream.toString().equals(X_WIN)){
+        //                System.out.println("X_WIN FROM TOP RIGHT TO BOTTOM LEFT");
+        //            }else if(cellstream.toString().equals(O_WIN)){
+        //                System.out.println("O_WIN FROM TOP RIGHT TO BOTTOM LEFT");
+        //            }
+        //            cellstream.setLength(0); //reset
+
+        //            //diagonal from TOP to BOTTOM // Fix this shit nigga  
+        //            for(int n = 0; n < 3; n++){
+        //                lx = x;
+        //                ly = y + n;
+
+        //                try{
+        //                    currentcell = CellHolder[ly][lx];
+        //                    cellstream.append(currentcell.valueOf);
+        //                }catch(ArrayIndexOutOfBoundsException e){
+        //                    break;
+        //                }
+        //            }
+        //            if(cellstream.toString().equals(X_WIN)){
+        //                System.out.println("X_WIN FROM VERTICAL POSITION");
+        //            }else if(cellstream.toString().equals(O_WIN)){
+        //                System.out.println("O_WIN FROM VERTICAL POSITION");
+        //            }
+        //            cellstream.setLength(0); //reset
+
+
+        //            //diagonal from TOP to BOTTOM // Fix this shit nigga  
+        //            for(int n = 0; n < 3; n++){
+        //                lx = x + n;
+        //                ly = y;
+
+        //                try{
+        //                    currentcell = CellHolder[ly][lx];
+        //                    cellstream.append(currentcell.valueOf);
+        //                }catch(ArrayIndexOutOfBoundsException e){
+        //                    break;
+        //                }
+        //            }
+        //            if(cellstream.toString().equals(X_WIN)){
+        //                System.out.println("X_WIN FROM HORIZONTAL POSITIOn");
+        //            }else if(cellstream.toString().equals(O_WIN)){
+        //                System.out.println("O_WIN FROM HORIZONTAL POSITIOn");
+        //            }
+        //            cellstream.setLength(0); //reset
+
+
+
+        //        }//inner
+        //    }// outter
+
+        //}
+
+    }
+
+
 }
 
 
@@ -376,5 +517,4 @@ class PrettyJButton extends JButton{
         gg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         gg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
     }
-
 }
