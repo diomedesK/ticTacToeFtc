@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 public class ticTacToe{
     JFrame MainWindow;
-    JPanel GameGrid;
+    PrettyJPanel GameGrid;
 
     JPanel OptionsPane;
     FormVisualizer formView;
@@ -30,11 +30,12 @@ public class ticTacToe{
         MainWindow = new JFrame();
         MainWindow.setTitle("Tic Tac Toe");
         MainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        MainWindow.setSize( new Dimension(500, 500));
+        MainWindow.setSize( new Dimension(600, 500));
         MainWindow.setLocationRelativeTo(null);
         MainWindow.setResizable(false);
 
-        GameGrid = new JPanel( new GridLayout(3, 3));
+        GameGrid = new PrettyJPanel( new GridLayout(3, 3));
+        GameGrid.setSize( new Dimension(500, 500));
     }
 
     public void setOptionPane(){
@@ -63,6 +64,7 @@ public class ticTacToe{
 
                 System.out.println("Restarting game");
 
+                GameGrid.shouldRisk = false;
                 CurrentForm = ticTacToe.X_FORM;
                 PlayedTimes = 0;
                 formViewLabel.setText("Next:");
@@ -132,6 +134,35 @@ public class ticTacToe{
 
                                 // System.out.println(Arrays.toString(gr.winningPositionStart));
                                 // System.out.println(Arrays.toString(gr.winningPositionEnd));
+
+                                int ix = gr.winningPositionStart[0];
+                                int iy = gr.winningPositionStart[1];
+                                int ex = gr.winningPositionEnd[0];
+                                int ey = gr.winningPositionEnd[1];
+
+
+                                //making the risk over the screen 
+                                TicTacToeCell cellWhich2RiskFrom = CellHolder[iy][ix];
+                                TicTacToeCell cellWhich2RiskTo = CellHolder[ey][ex];
+
+                                Point riskFrom = cellWhich2RiskFrom.getLocation();
+                                Point riskTo = cellWhich2RiskTo.getLocation();
+
+                                riskFrom.x += cellWhich2RiskFrom.getWidth()/2;
+                                riskFrom.y += cellWhich2RiskFrom.getHeight()/2;
+
+                                riskTo.x += cellWhich2RiskTo.getWidth()/2;
+                                riskTo.y += cellWhich2RiskTo.getHeight()/2 ;
+
+                                System.out.println(riskFrom);
+                                System.out.println("To");
+                                System.out.println(riskTo);
+
+                                
+                                GameGrid.riskScreen(riskFrom, riskTo);
+
+                                MainWindow.repaint();
+
                             }
 
                             PlayedTimes += 1;
@@ -139,6 +170,7 @@ public class ticTacToe{
 
                         if(PlayedTimes == (3*3) ){
                             CurrentForm = ticTacToe.NULL_FORM;
+                            formViewLabel.setText("Draw");
                         }
 
                         MainWindow.repaint();
@@ -252,9 +284,6 @@ public class ticTacToe{
                 Graphics2DFormPainter.drawCircle(gg, this.getWidth(), this.getWidth());
             }
 
-            // g.setColor(Color.black);
-            // g.drawRect(0, 0, 20, 20);
-
         }
 
     }// end class
@@ -265,8 +294,10 @@ public class ticTacToe{
             gg.setColor(Color.BLUE);
             gg.setStroke(new BasicStroke(10.0f));
 
-            int marginX = (int) (width * 0.165);
-            int marginY = (int) (height * 0.165);
+            double factor = 0.200;
+
+            int marginX = (int) (width * factor);
+            int marginY = (int) (height * factor);
 
             //Desenha duas linhas
             gg.drawLine(0 + marginX, 0 + marginY, width - marginX, height - marginY);
@@ -397,105 +428,44 @@ public class ticTacToe{
             return status;
         }
 
-        //public void checkIfWin(){
-        //    String X_WIN = "111";
-        //    String O_WIN = "000";
-
-        //    for(int x=0; x < CellHolder.length; x++){
-        //        for(int y =0; y < CellHolder.length; y++){
-        //            StringBuilder cellstream = new StringBuilder();
-        //            TicTacToeCell currentcell;
-        //            int lx; int ly;
-
-        //            //diagonal from TOP LEFT to BOTTOM RIGHT
-        //            for(int n = 0; n < 3; n++){
-        //                lx = x + n;
-        //                ly = y + n;
-
-        //                try{
-        //                    currentcell = CellHolder[ly][lx];
-        //                    cellstream.append(currentcell.valueOf);
-        //                }catch(ArrayIndexOutOfBoundsException e){
-        //                    break;
-        //                }
-        //            }
-        //            if(cellstream.toString().equals(X_WIN)){
-        //                System.out.println("X_WIN FROM TOP LEFT TO BOTTOM RIGHT");
-        //            }else if(cellstream.toString().equals(O_WIN)){
-        //                System.out.println("O_WIN FROM TOP LEFT TO BOTTOM RIGHT");
-        //            }
-        //            cellstream.setLength(0); //reset
-
-        //            //diagonal from TOP RIGHT to BOTTOM LEFT
-        //            for(int n = 0; n < 3; n++){
-        //                lx = x - n;
-        //                ly = y + n;
-
-        //                try{
-        //                    currentcell = CellHolder[ly][lx];
-        //                    cellstream.append(currentcell.valueOf);
-        //                }catch(ArrayIndexOutOfBoundsException e){
-        //                    break;
-        //                }
-        //            }
-        //            if(cellstream.toString().equals(X_WIN)){
-        //                System.out.println("X_WIN FROM TOP RIGHT TO BOTTOM LEFT");
-        //            }else if(cellstream.toString().equals(O_WIN)){
-        //                System.out.println("O_WIN FROM TOP RIGHT TO BOTTOM LEFT");
-        //            }
-        //            cellstream.setLength(0); //reset
-
-        //            //diagonal from TOP to BOTTOM // Fix this shit nigga  
-        //            for(int n = 0; n < 3; n++){
-        //                lx = x;
-        //                ly = y + n;
-
-        //                try{
-        //                    currentcell = CellHolder[ly][lx];
-        //                    cellstream.append(currentcell.valueOf);
-        //                }catch(ArrayIndexOutOfBoundsException e){
-        //                    break;
-        //                }
-        //            }
-        //            if(cellstream.toString().equals(X_WIN)){
-        //                System.out.println("X_WIN FROM VERTICAL POSITION");
-        //            }else if(cellstream.toString().equals(O_WIN)){
-        //                System.out.println("O_WIN FROM VERTICAL POSITION");
-        //            }
-        //            cellstream.setLength(0); //reset
-
-
-        //            //diagonal from TOP to BOTTOM // Fix this shit nigga  
-        //            for(int n = 0; n < 3; n++){
-        //                lx = x + n;
-        //                ly = y;
-
-        //                try{
-        //                    currentcell = CellHolder[ly][lx];
-        //                    cellstream.append(currentcell.valueOf);
-        //                }catch(ArrayIndexOutOfBoundsException e){
-        //                    break;
-        //                }
-        //            }
-        //            if(cellstream.toString().equals(X_WIN)){
-        //                System.out.println("X_WIN FROM HORIZONTAL POSITIOn");
-        //            }else if(cellstream.toString().equals(O_WIN)){
-        //                System.out.println("O_WIN FROM HORIZONTAL POSITIOn");
-        //            }
-        //            cellstream.setLength(0); //reset
-
-
-
-        //        }//inner
-        //    }// outter
-
-        //}
-
     }
-
 
 }
 
+
+class PrettyJPanel extends JPanel{
+    boolean shouldRisk;
+    Point riskFrom;
+    Point riskTo;
+
+    PrettyJPanel(LayoutManager l){
+        super(l);
+    }
+
+    @Override
+    public void paint(Graphics g){
+        super.paint(g);
+
+        if(shouldRisk){
+            Graphics2D gg = (Graphics2D) g;
+            // System.out.println("Risking");
+
+            gg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); 
+
+            gg.setColor( new Color(135, 27, 27));
+            gg.setStroke(new BasicStroke(15.0f));
+            gg.drawLine(riskFrom.x, riskFrom.y, riskTo.x, riskTo.y);
+        }
+
+    }
+
+    public void riskScreen(Point riskFrom, Point riskTo){
+        shouldRisk = true;
+        this.riskFrom = riskFrom;
+        this.riskTo = riskTo;
+    }
+
+}
 
 class PrettyJLabel extends JLabel{
     PrettyJLabel(){
