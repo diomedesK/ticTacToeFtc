@@ -12,6 +12,7 @@ public class ticTacToe{
     FormVisualizer formView;
 
     int CurrentForm;
+    int PlayedTimes;
 
     static final int NULL_FORM = 0;
     static final int X_FORM = 1;
@@ -49,10 +50,11 @@ public class ticTacToe{
                         TicTacToeCell c = CellHolder[i][j];
                         c.valueOf = 0;
                     }
-
                 }
 
                 System.out.println("Restarting game");
+                CurrentForm = ticTacToe.X_FORM;
+                PlayedTimes = 0;
                 MainWindow.repaint();
 
 			}// end ActionEvent
@@ -86,7 +88,15 @@ public class ticTacToe{
                         if(cell.valueOf == ticTacToe.NULL_FORM){
                             cell.valueOf = CurrentForm;
                             updateForm();
+
+                            PlayedTimes += 1;
                         }
+
+                        if(PlayedTimes == (3*3) ){
+                            CurrentForm = ticTacToe.NULL_FORM;
+                        }
+
+                        MainWindow.repaint();
 
                     }// end ActionEvent
                 }
@@ -103,6 +113,7 @@ public class ticTacToe{
 
         formView = new FormVisualizer(50);
         OptionsPane.add(formViewText);
+        OptionsPane.add(Box.createVerticalStrut(5));
         OptionsPane.add(formView);
     }
 
@@ -122,15 +133,15 @@ public class ticTacToe{
     public void run(){
         setBaseGUI();
         setCells();
-
         setOptionPane();
+
         MainWindow.setVisible(true); 
 
         setFormView(); // this necessarily has to come after 
 
-
         CurrentForm = ticTacToe.X_FORM;
-        updateForm();
+
+        MainWindow.repaint();
     }
 
     public static void main(String[] args){
@@ -180,9 +191,22 @@ public class ticTacToe{
 
         public void paintComponent(Graphics g){
             System.out.println("PaintComponent Called in FormVisualizer"); 
-            g.setColor(Color.black);
-            g.drawRect(0, 0, 20, 20);
-		super.paintComponent(g);
+            super.paintComponent(g);
+
+            Graphics2D gg = (Graphics2D) g;
+            if(CurrentForm == ticTacToe.NULL_FORM){
+                System.out.println("Drawing NULL in view"); 
+            }
+            else if(CurrentForm == ticTacToe.X_FORM){
+                System.out.println("Drawing X in view"); 
+                Graphics2DFormPainter.drawX(gg, this.getWidth(), this.getWidth());
+            }else if(CurrentForm == ticTacToe.O_FORM){
+                System.out.println("Drawing O in view"); 
+                Graphics2DFormPainter.drawCircle(gg, this.getWidth(), this.getWidth());
+            }
+
+            // g.setColor(Color.black);
+            // g.drawRect(0, 0, 20, 20);
 
         }
 
